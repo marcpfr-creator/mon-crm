@@ -2773,6 +2773,7 @@ function openSyncModal() {
   const apiKey = localStorage.getItem(SYNC_KEY_STORE) || '';
   const binId  = localStorage.getItem(SYNC_BIN_STORE) || '';
   document.getElementById('sync-api-key').value = apiKey ? '••••••••••' + apiKey.slice(-6) : '';
+  document.getElementById('sync-bin-id').value = binId || '';
   document.getElementById('sync-clear-btn').style.display = (apiKey && binId) ? 'inline-block' : 'none';
   updateSyncStatusBar();
 }
@@ -2795,7 +2796,9 @@ async function saveSyncConfig() {
   result.textContent = '⟳ Connexion GitHub…'; result.style.color='var(--muted)';
 
   try {
-    let gistId = localStorage.getItem(SYNC_BIN_STORE);
+    // Utiliser le Gist ID saisi manuellement en priorité
+    const manualGistId = document.getElementById('sync-bin-id').value.trim();
+    let gistId = manualGistId || localStorage.getItem(SYNC_BIN_STORE);
 
     if(!gistId) {
       result.textContent = '⟳ Création du Gist de synchronisation…'; result.style.color='var(--muted)';
@@ -4503,7 +4506,8 @@ tSyncICloud();
             <span style="color:var(--green);font-weight:600">✓ Le Gist de données sera créé automatiquement.</span>
           </div>
           <input class="sync-input" id="sync-api-key" type="password" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" oninput="onSyncConfigChange()">
-          <input type="hidden" id="sync-bin-id">
+          <div style="margin-top:8px;font-size:10px;color:var(--muted);">Gist ID (optionnel — laissez vide pour en créer un nouveau, ou collez l'ID d'un Gist existant pour partager entre appareils)</div>
+          <input class="sync-input" id="sync-bin-id" type="text" placeholder="ex: 759d8ad149e01949a09202551ce0e9ea" oninput="onSyncConfigChange()" style="margin-top:4px;font-size:10px;">
           <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
             <button class="btn btn-primary btn-sm" onclick="saveSyncConfig()">🔗 Connecter et synchroniser</button>
             <button class="btn btn-ghost btn-sm" id="sync-clear-btn" onclick="clearSyncConfig()" style="display:none">🗑 Supprimer config</button>
