@@ -2725,12 +2725,14 @@ async function doAutoSync() {
     if(remote && remote.v === 2 && remote.ts > localTs) {
       // Cloud est plus récent → on écrase le local
       restoreAllData(remote);
+      // Recharger tTasks en mémoire depuis localStorage après restore
       tTasks = JSON.parse(localStorage.getItem('todo_tasks') || '[]');
       load(); loadSoldesInitiaux(); loadResultat();
       populateClientSelects(); renderPipeline(); renderDashboard(); updateGlobalKPIs();
       if(typeof tRender === 'function') tRender();
       if(typeof tRenderCal === 'function') tRenderCal();
       if(typeof tRenderStats === 'function') tRenderStats();
+      if(typeof updateNotifBadge === 'function') updateNotifBadge();
       const activeTab = document.querySelector('.tab-btn.active');
       if(activeTab) { const m = activeTab.getAttribute('onclick').match(/switchTab\('(\w+)'/); if(m) switchTab(m[1], activeTab); }
       localStorage.setItem(SYNC_LAST_STORE, String(remote.ts));
@@ -3650,8 +3652,8 @@ let tSortDir  = 1;
 let tCalDate  = new Date();
 let tIcalEvts = [];
 
-// Seed demo if empty
-if (!tTasks.length) {
+// Seed demo if empty AND no sync configured (evite d'ecraser les données syncées)
+if (!tTasks.length && !localStorage.getItem('east_sync_apikey')) {
   const today = new Date();
   const fmt = d => d.toISOString().split('T')[0];
   const add = n => { const d = new Date(today); d.setDate(d.getDate()+n); return fmt(d); };
@@ -3667,6 +3669,8 @@ if (!tTasks.length) {
 
 function tSave() {
   localStorage.setItem('todo_tasks', JSON.stringify(tTasks));
+  // Mettre à jour le timestamp local pour forcer un push au prochain sync
+  localStorage.setItem('east_sync_lastsync', String(Date.now() + 5000)); // +5s pour gagner face au cloud
   // trigger cloud sync if configured
   if (localStorage.getItem('east_sync_apikey')) {
     clearTimeout(window._syncDebounce);
