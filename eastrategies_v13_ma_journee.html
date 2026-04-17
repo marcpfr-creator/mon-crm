@@ -1,0 +1,1383 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Ma Journée">
+<meta name="theme-color" content="#0f0e0c">
+<title>Eastrategies® — Ma Journée v13</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f5f2eb; --ink:#0f0e0c; --card:#fff; --border:#d9d4c9; --muted:#8a8378;
+  --accent:#e8c547; --blue:#1a1aff; --orange:#ff4d00; --green:#00b87a;
+  --purple:#8800ff; --pink:#ff0066; --red:#e53935; --teal:#00838f;
+  --shadow:3px 3px 0 #0f0e0c; --shadow-lg:6px 6px 0 #0f0e0c;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:var(--bg); color:var(--ink); font-family:'IBM Plex Mono',monospace; min-height:100vh; }
+body { padding-bottom: env(safe-area-inset-bottom); }
+
+/* HEADER */
+header {
+  background: var(--ink); color: var(--bg); padding: 16px 32px;
+  display: flex; justify-content: space-between; align-items: center;
+  flex-wrap: wrap; gap: 12px; position: sticky; top: 0; z-index: 50;
+  border-bottom: 3px solid var(--accent);
+  padding-top: max(16px, env(safe-area-inset-top));
+}
+header h1 { font-family:'Syne',sans-serif; font-size:clamp(14px,2vw,20px); font-weight:800; letter-spacing:-1px; }
+header h1 em { color:var(--accent); font-style:normal; }
+
+.logo-box { background:#fff; padding:5px 10px; display:flex; align-items:center; border-radius:2px; }
+.logo-box img { height:28px; width:auto; }
+
+/* UTILS */
+.btn { font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:1px;
+  text-transform:uppercase; padding:7px 13px; cursor:pointer; border:1.5px solid;
+  transition:all .15s; }
+.btn-primary { background:var(--accent); border-color:var(--accent); color:#000; box-shadow:var(--shadow); }
+.btn-primary:hover { transform:translate(-1px,-1px); box-shadow:4px 4px 0 #000; }
+.btn-ghost { background:transparent; border-color:var(--border); color:var(--muted); }
+.btn-ghost:hover { border-color:var(--ink); color:var(--ink); }
+.btn-sm { font-size:10px; padding:5px 10px; }
+
+/* SECTION */
+.section { padding:0; display:none; }
+.section.active { display:block; }
+
+/* TABS */
+.tab-nav { display:flex; background:var(--card); border-bottom:2px solid var(--ink);
+  padding:0 32px; overflow-x:auto; }
+.tab-btn { font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:1px;
+  text-transform:uppercase; padding:12px 16px; border:none; background:transparent;
+  cursor:pointer; color:var(--muted); border-bottom:3px solid transparent;
+  margin-bottom:-2px; transition:all .15s; white-space:nowrap; }
+.tab-btn:hover { color:var(--ink); }
+.tab-btn.active { color:var(--ink); border-bottom-color:var(--accent); font-weight:700; }
+
+/* ICON BTN */
+.icon-btn { background:transparent; border:1px solid var(--border); padding:4px 7px;
+  font-size:11px; cursor:pointer; transition:all .15s; color:var(--muted); font-family:'IBM Plex Mono',monospace; }
+.icon-btn:hover { border-color:var(--ink); color:var(--ink); }
+
+/* TOAST */
+.toast { position:fixed; bottom:22px; right:22px; background:var(--ink); color:var(--bg);
+  font-size:11px; padding:10px 16px; border-left:3px solid var(--accent);
+  opacity:0; transform:translateY(8px); transition:all .25s; pointer-events:none; z-index:999; }
+.toast.show { opacity:1; transform:translateY(0); }
+
+footer { text-align:center; padding:12px; font-size:10px; color:#aaa;
+  border-top:1px solid var(--border); background:var(--card); letter-spacing:1px; }
+
+@media(max-width:768px) {
+  header, .tab-nav { padding-left:16px; padding-right:16px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+    <div class="logo-box">
+      <img src="https://www.eastrategies.fr/wp-content/uploads/2022/08/logo.png" alt="Eastrategies®"
+        onerror="this.style.display='none'">
+    </div>
+    <div>
+      <h1>EASTRATEGIES® — <em>MA JOURNÉE</em></h1>
+      <div style="font-size:9px;color:#777;letter-spacing:2px;margin-top:2px">Top 3 du jour · Piliers · Timer Focus · v13</div>
+    </div>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center;">
+    <a href="javascript:void(0)" onclick="showToast('💡 Intégrez ce module dans votre CRM v12 complet')"
+      class="btn btn-primary btn-sm">ℹ Intégration CRM</a>
+  </div>
+</header>
+
+<!-- TABS -->
+<div class="tab-nav">
+  <button class="tab-btn active" onclick="switchTab('journee',this)">🗓 Ma Journée</button>
+  <button class="tab-btn" onclick="showToast('→ Dans votre CRM complet: Pipeline, Facturation, Trésorerie…')">📊 Dashboard CRM</button>
+  <button class="tab-btn" onclick="showToast('→ Disponible dans le CRM complet v12+')">📋 Pipeline</button>
+  <button class="tab-btn" onclick="showToast('→ Disponible dans le CRM complet v12+')">📝 Tâches</button>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     MODULE : MA JOURNÉE — CSS
+═══════════════════════════════════════════════════════ -->
+<style>
+/* ── PILIERS ── */
+:root {
+  --pilier-gestion:   #1B3A6B;
+  --pilier-leads:     #C8A84B;
+  --pilier-publi:     #00838f;
+  --pilier-seo:       #8800ff;
+}
+
+/* ── TOP 3 ── */
+.j-wrap {
+  background: var(--bg);
+  padding: 28px;
+  min-height: 80vh;
+  font-family: 'IBM Plex Mono', monospace;
+}
+.j-date-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 28px;
+  padding-bottom: 20px;
+  border-bottom: 1.5px solid var(--border);
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.j-date-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  line-height: 1;
+}
+.j-date-title span { color: var(--accent); }
+.j-date-info {
+  text-align: right;
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.9;
+}
+.j-date-day {
+  font-family: 'Syne', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+/* ── LAYOUT PRINCIPAL ── */
+.j-layout {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 24px;
+  align-items: start;
+}
+@media(max-width:900px) { .j-layout { grid-template-columns: 1fr; } }
+
+/* ── TOP 3 CARD ── */
+.j-top3-card {
+  background: var(--card);
+  border: 1.5px solid var(--ink);
+  box-shadow: var(--shadow-lg);
+  margin-bottom: 20px;
+}
+.j-top3-header {
+  background: var(--ink);
+  color: var(--bg);
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.j-top3-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+.j-top3-date-badge {
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  color: var(--accent);
+  text-transform: uppercase;
+}
+.j-top3-body {
+  padding: 20px;
+}
+
+/* ── PRIORITÉ ITEM ── */
+.j-priority-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 14px 16px;
+  border: 1.5px solid var(--border);
+  margin-bottom: 10px;
+  background: var(--bg);
+  transition: all .15s;
+  position: relative;
+  overflow: hidden;
+}
+.j-priority-item::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 4px;
+}
+.j-priority-item[data-pilier="gestion"]::before  { background: var(--pilier-gestion); }
+.j-priority-item[data-pilier="leads"]::before    { background: var(--pilier-leads); }
+.j-priority-item[data-pilier="publi"]::before    { background: var(--pilier-publi); }
+.j-priority-item[data-pilier="seo"]::before      { background: var(--pilier-seo); }
+.j-priority-item.j-done { opacity: .45; }
+.j-priority-item.j-done .j-prio-name { text-decoration: line-through; }
+
+.j-prio-num {
+  font-family: 'Syne', sans-serif;
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--border);
+  flex-shrink: 0;
+  width: 36px;
+  text-align: center;
+  margin-top: 2px;
+}
+.j-priority-item[data-pilier="gestion"] .j-prio-num { color: var(--pilier-gestion); }
+.j-priority-item[data-pilier="leads"]   .j-prio-num { color: var(--pilier-leads); }
+.j-priority-item[data-pilier="publi"]   .j-prio-num { color: var(--pilier-publi); }
+.j-priority-item[data-pilier="seo"]     .j-prio-num { color: var(--pilier-seo); }
+
+.j-prio-body { flex: 1; min-width: 0; }
+
+.j-prio-name {
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: var(--ink);
+  cursor: pointer;
+}
+.j-prio-name:focus {
+  outline: 1.5px solid var(--ink);
+  background: #fffbe6;
+  padding: 2px 4px;
+}
+
+.j-prio-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.j-pilier-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border: 1.5px solid;
+}
+.j-pilier-badge[data-p="gestion"]  { color: var(--pilier-gestion);  border-color: var(--pilier-gestion);  background: #e8eef7; }
+.j-pilier-badge[data-p="leads"]    { color: #7a5c00;                 border-color: var(--pilier-leads);    background: #fffbe6; }
+.j-pilier-badge[data-p="publi"]    { color: var(--pilier-publi);    border-color: var(--pilier-publi);    background: #e0f7fa; }
+.j-pilier-badge[data-p="seo"]      { color: var(--pilier-seo);      border-color: var(--pilier-seo);      background: #f3e5ff; }
+
+.j-prio-select {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  border: 1.5px solid var(--border);
+  background: var(--bg);
+  color: var(--ink);
+  padding: 2px 6px;
+  outline: none;
+  cursor: pointer;
+}
+.j-prio-select:focus { border-color: var(--ink); }
+
+.j-prio-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.j-check-btn {
+  width: 28px;
+  height: 28px;
+  border: 1.5px solid var(--border);
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  transition: all .15s;
+  color: var(--muted);
+}
+.j-check-btn:hover { border-color: var(--green); color: var(--green); }
+.j-check-btn.checked { background: var(--green); border-color: var(--green); color: #fff; }
+
+/* ── TIMER ── */
+.j-timer-btn {
+  width: 28px;
+  height: 28px;
+  border: 1.5px solid var(--border);
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  transition: all .15s;
+  color: var(--muted);
+}
+.j-timer-btn:hover { border-color: var(--orange); color: var(--orange); }
+.j-timer-btn.running { border-color: var(--orange); color: var(--orange); background: #fff3e0; }
+
+.j-timer-display {
+  font-family: 'Syne', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  text-align: center;
+  min-width: 40px;
+}
+.j-timer-display.running { color: var(--orange); }
+
+/* ── FOCUS TIMER CARD ── */
+.j-focus-card {
+  background: var(--ink);
+  color: var(--bg);
+  border: 1.5px solid var(--ink);
+  box-shadow: var(--shadow-lg);
+  padding: 20px;
+  margin-bottom: 20px;
+  position: relative;
+  overflow: hidden;
+}
+.j-focus-card::after {
+  content: '⏱';
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 48px;
+  opacity: .06;
+}
+.j-focus-label {
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #888;
+  margin-bottom: 8px;
+}
+.j-focus-name {
+  font-family: 'Syne', sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--accent);
+  margin-bottom: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.j-focus-clock {
+  font-family: 'Syne', sans-serif;
+  font-size: 40px;
+  font-weight: 800;
+  letter-spacing: -2px;
+  line-height: 1;
+  margin-bottom: 14px;
+}
+.j-focus-clock.j-paused { color: #555; }
+.j-focus-btns {
+  display: flex;
+  gap: 8px;
+}
+.j-fb {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 7px 14px;
+  cursor: pointer;
+  border: 1.5px solid;
+  background: transparent;
+  color: var(--bg);
+  border-color: #555;
+  transition: all .15s;
+}
+.j-fb:hover { border-color: var(--bg); }
+.j-fb.primary { background: var(--accent); color: #000; border-color: var(--accent); }
+.j-fb.danger  { border-color: var(--red); color: var(--red); }
+.j-fb.danger:hover { background: var(--red); color: #fff; }
+
+/* ── PILIERS PLANNING ── */
+.j-piliers-card {
+  background: var(--card);
+  border: 1.5px solid var(--ink);
+  box-shadow: var(--shadow);
+  margin-bottom: 20px;
+}
+.j-piliers-header {
+  background: var(--ink);
+  color: var(--bg);
+  padding: 12px 16px;
+  font-family: 'Syne', sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+}
+.j-piliers-body { padding: 16px; }
+
+.j-pilier-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.j-pilier-icon {
+  font-size: 16px;
+  flex-shrink: 0;
+  width: 24px;
+  text-align: center;
+}
+.j-pilier-info { flex: 1; }
+.j-pilier-name {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+.j-pilier-bar-bg {
+  height: 8px;
+  background: #ece9e0;
+  position: relative;
+}
+.j-pilier-bar-fill {
+  height: 100%;
+  transition: width .5s ease;
+}
+.j-pilier-count {
+  font-family: 'Syne', sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  min-width: 24px;
+  text-align: right;
+}
+
+/* ── SEMAINE MINI ── */
+.j-week-mini {
+  background: var(--card);
+  border: 1.5px solid var(--ink);
+  box-shadow: var(--shadow);
+  margin-bottom: 20px;
+}
+.j-week-mini-header {
+  background: var(--ink);
+  color: var(--bg);
+  padding: 12px 16px;
+  font-family: 'Syne', sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.j-week-mini-nav button {
+  background: none;
+  border: 1px solid rgba(255,255,255,.3);
+  color: var(--bg);
+  width: 22px;
+  height: 22px;
+  cursor: pointer;
+  font-size: 11px;
+}
+.j-week-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  border-top: 1px solid var(--border);
+}
+.j-week-day {
+  padding: 8px 4px;
+  text-align: center;
+  border-right: 1px solid var(--border);
+  cursor: pointer;
+  transition: background .1s;
+}
+.j-week-day:last-child { border-right: none; }
+.j-week-day:hover { background: #f5f2eb; }
+.j-week-day.j-today { background: #fffbe6; }
+.j-week-day-name {
+  font-size: 8px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--muted);
+  margin-bottom: 3px;
+}
+.j-week-day-num {
+  font-family: 'Syne', sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+}
+.j-today .j-week-day-num {
+  background: var(--ink);
+  color: var(--accent);
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  margin: 0 auto;
+}
+.j-week-day-dots {
+  display: flex;
+  gap: 2px;
+  justify-content: center;
+  margin-top: 4px;
+  flex-wrap: wrap;
+  min-height: 6px;
+}
+.j-week-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+}
+
+/* ── STATS PILIERS ── */
+.j-stats-row {
+  display: grid;
+  grid-template-columns: repeat(4,1fr);
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.j-stat-pilier {
+  background: var(--card);
+  border: 1.5px solid var(--ink);
+  box-shadow: var(--shadow);
+  padding: 12px 10px;
+  text-align: center;
+}
+.j-stat-pilier-val {
+  font-family: 'Syne', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1;
+  margin-bottom: 3px;
+}
+.j-stat-pilier-lbl {
+  font-size: 8px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* ── AJOUT RAPIDE ── */
+.j-add-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 14px 20px;
+  border-top: 1.5px solid var(--border);
+  background: var(--bg);
+  flex-wrap: wrap;
+}
+.j-add-input {
+  flex: 1;
+  min-width: 160px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  border: 1.5px solid var(--border);
+  background: var(--card);
+  color: var(--ink);
+  padding: 8px 12px;
+  outline: none;
+}
+.j-add-input:focus { border-color: var(--ink); }
+.j-add-select {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  border: 1.5px solid var(--border);
+  background: var(--card);
+  color: var(--ink);
+  padding: 8px 10px;
+  outline: none;
+  cursor: pointer;
+}
+
+/* ── RECAP JOURNÉE ── */
+.j-recap-card {
+  background: var(--card);
+  border: 1.5px solid var(--ink);
+  box-shadow: var(--shadow);
+}
+.j-recap-header {
+  background: var(--ink);
+  color: var(--bg);
+  padding: 12px 16px;
+  font-family: 'Syne', sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+}
+.j-recap-body { padding: 14px 16px; }
+.j-recap-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 11px;
+}
+.j-recap-row:last-child { border-bottom: none; }
+.j-recap-label { color: var(--muted); }
+.j-recap-val {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 13px;
+}
+
+/* ── NOTE DU JOUR ── */
+.j-note-area {
+  width: 100%;
+  box-sizing: border-box;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  border: 1.5px solid var(--border);
+  background: var(--bg);
+  color: var(--ink);
+  padding: 10px 12px;
+  outline: none;
+  resize: vertical;
+  min-height: 80px;
+  margin-top: 10px;
+  transition: border-color .15s;
+}
+.j-note-area:focus { border-color: var(--ink); }
+
+/* ── HISTORIQUE MODAL ── */
+.j-hist-bd {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(15,14,12,.75);
+  z-index: 500;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.j-hist-bd.open { display: flex; }
+.j-hist-modal {
+  background: var(--card);
+  border: 1.5px solid var(--ink);
+  box-shadow: var(--shadow-lg);
+  width: 520px;
+  max-width: 95vw;
+  max-height: 85vh;
+  overflow-y: auto;
+  font-family: 'IBM Plex Mono', monospace;
+}
+.j-hist-head {
+  background: var(--ink);
+  color: var(--bg);
+  padding: 14px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.j-hist-head h3 {
+  font-family: 'Syne', sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+}
+.j-hist-body { padding: 20px; }
+.j-hist-day {
+  margin-bottom: 18px;
+  border-left: 3px solid var(--border);
+  padding-left: 14px;
+}
+.j-hist-day-date {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.j-hist-task {
+  font-size: 11px;
+  padding: 4px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.j-hist-task-done { color: var(--green); }
+.j-hist-task-pending { color: var(--muted); }
+</style>
+
+<!-- ═══════════════════════════════════════════════════════
+     MODULE : MA JOURNÉE — HTML
+═══════════════════════════════════════════════════════ -->
+<div class="section active" id="section-journee">
+<div class="j-wrap">
+
+  <!-- Header -->
+  <div class="j-date-bar">
+    <div>
+      <div class="j-date-title">Ma <span>Journée</span></div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px;font-family:'IBM Plex Mono',monospace;">Top 3 · Piliers · Focus</div>
+    </div>
+    <div class="j-date-info">
+      <div class="j-date-day" id="j-today-label">—</div>
+      <div id="j-clock" style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--accent);">—</div>
+    </div>
+  </div>
+
+  <!-- Stats 4 piliers -->
+  <div class="j-stats-row" id="j-stats-piliers">
+    <div class="j-stat-pilier"><div class="j-stat-pilier-val" id="jst-gestion" style="color:var(--pilier-gestion)">0</div><div class="j-stat-pilier-lbl">🏢 Gestion</div></div>
+    <div class="j-stat-pilier"><div class="j-stat-pilier-val" id="jst-leads" style="color:var(--pilier-leads)">0</div><div class="j-stat-pilier-lbl">🎯 Leads</div></div>
+    <div class="j-stat-pilier"><div class="j-stat-pilier-val" id="jst-publi" style="color:var(--pilier-publi)">0</div><div class="j-stat-pilier-lbl">📝 Publications</div></div>
+    <div class="j-stat-pilier"><div class="j-stat-pilier-val" id="jst-seo" style="color:var(--pilier-seo)">0</div><div class="j-stat-pilier-lbl">🔍 SEO/GEO</div></div>
+  </div>
+
+  <div class="j-layout">
+    <!-- Colonne principale -->
+    <div>
+      <!-- Top 3 du jour -->
+      <div class="j-top3-card">
+        <div class="j-top3-header">
+          <div class="j-top3-title">🎯 Top 3 du jour</div>
+          <div class="j-top3-date-badge" id="j-top3-date-badge">—</div>
+        </div>
+        <div class="j-top3-body" id="j-top3-body">
+          <!-- Injecté par JS -->
+        </div>
+        <div class="j-add-row">
+          <input class="j-add-input" id="j-new-task" placeholder="Ajouter une priorité…" onkeydown="if(event.key==='Enter')jAddTask()">
+          <select class="j-add-select" id="j-new-pilier">
+            <option value="gestion">🏢 Gestion</option>
+            <option value="leads">🎯 Leads</option>
+            <option value="publi">📝 Publications</option>
+            <option value="seo">🔍 SEO/GEO</option>
+          </select>
+          <button class="btn btn-primary btn-sm" onclick="jAddTask()">+ Ajouter</button>
+          <button class="btn btn-ghost btn-sm" onclick="jOpenHistory()" style="color:var(--ink);border-color:var(--ink)">📋 Historique</button>
+        </div>
+      </div>
+
+      <!-- Note du jour -->
+      <div style="background:var(--card);border:1.5px solid var(--ink);box-shadow:var(--shadow);padding:16px;margin-bottom:20px;">
+        <div style="font-family:'Syne',sans-serif;font-size:12px;font-weight:800;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;">
+          📝 Note du jour
+          <button class="btn btn-ghost btn-sm" onclick="jSaveNote()" style="font-size:9px;">💾 Sauvegarder</button>
+        </div>
+        <textarea class="j-note-area" id="j-note-area" placeholder="Contexte, idées, blocages, prochaines étapes…&#10;Ce champ est sauvegardé automatiquement chaque minute."></textarea>
+      </div>
+
+      <!-- Semaine mini calendrier -->
+      <div class="j-week-mini">
+        <div class="j-week-mini-header">
+          📅 Semaine en cours
+          <div class="j-week-mini-nav">
+            <button onclick="jWeekNav(-1)">←</button>
+            <button onclick="jWeekNav(1)" style="margin-left:4px">→</button>
+          </div>
+        </div>
+        <div class="j-week-grid" id="j-week-grid"><!-- injecté --></div>
+      </div>
+    </div>
+
+    <!-- Colonne latérale -->
+    <div>
+      <!-- Timer Focus -->
+      <div class="j-focus-card" id="j-focus-card">
+        <div class="j-focus-label">Focus actuel</div>
+        <div class="j-focus-name" id="j-focus-name">Aucune tâche en cours</div>
+        <div class="j-focus-clock" id="j-focus-clock">00:00:00</div>
+        <div class="j-focus-btns">
+          <button class="j-fb primary" id="j-focus-btn" onclick="jToggleFocus()">▶ Démarrer</button>
+          <button class="j-fb" onclick="jResetFocus()">↺ Reset</button>
+        </div>
+        <div style="margin-top:12px;font-size:9px;color:#666;letter-spacing:1px;">
+          Temps total aujourd'hui : <span id="j-total-time" style="color:var(--accent);font-weight:700">0 min</span>
+        </div>
+      </div>
+
+      <!-- Répartition piliers -->
+      <div class="j-piliers-card">
+        <div class="j-piliers-header">⚡ Répartition par pilier</div>
+        <div class="j-piliers-body" id="j-piliers-body"><!-- injecté --></div>
+      </div>
+
+      <!-- Récap journée -->
+      <div class="j-recap-card">
+        <div class="j-recap-header">📊 Récap du jour</div>
+        <div class="j-recap-body" id="j-recap-body"><!-- injecté --></div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- Historique modal -->
+<div class="j-hist-bd" id="j-hist-bd" onclick="if(event.target===this)jCloseHistory()">
+  <div class="j-hist-modal" onclick="event.stopPropagation()">
+    <div class="j-hist-head">
+      <h3>📋 Historique des journées</h3>
+      <button onclick="jCloseHistory()" style="background:none;border:1px solid rgba(255,255,255,.3);color:var(--bg);width:26px;height:26px;cursor:pointer;">✕</button>
+    </div>
+    <div class="j-hist-body" id="j-hist-body"><!-- injecté --></div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+//  MA JOURNÉE — ENGINE
+// ═══════════════════════════════════════════════════════
+const J_SK  = 'east_journee';
+const PILIER_COLORS = {
+  gestion: '#1B3A6B',
+  leads:   '#C8A84B',
+  publi:   '#00838f',
+  seo:     '#8800ff'
+};
+const PILIER_LABELS = {
+  gestion: '🏢 Gestion société',
+  leads:   '🎯 Leads & Prospection',
+  publi:   '📝 Publications & Content',
+  seo:     '🔍 SEO / GEO'
+};
+
+// Data structure
+// jData = { date: { tasks: [{id,name,pilier,done,timerSec}], note, totalSec } }
+let jData = {};
+let jTodayKey = '';
+let jFocusTaskId = null;
+let jFocusRunning = false;
+let jFocusInterval = null;
+let jFocusElapsed = 0;
+let jWeekOffset = 0;
+let jClockInterval = null;
+let jAutoSaveInterval = null;
+
+function jGetToday() {
+  const d = new Date();
+  const pad = n => String(n).padStart(2,'0');
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+}
+
+function jLoad() {
+  try {
+    const raw = localStorage.getItem(J_SK);
+    if (raw) jData = JSON.parse(raw);
+  } catch(e) { jData = {}; }
+  jTodayKey = jGetToday();
+  if (!jData[jTodayKey]) {
+    jData[jTodayKey] = { tasks: [], note: '', totalSec: 0 };
+  }
+  // Migrate: si top3 vide, proposer les 3 premières tâches urgentes du gestionnaire
+  if (!jData[jTodayKey].tasks.length) {
+    jBootstrapFromTasks();
+  }
+}
+
+function jBootstrapFromTasks() {
+  // Récupérer les 3 tâches les plus urgentes depuis le gestionnaire de tâches
+  const today = jGetToday();
+  const urgent = (typeof tTasks !== 'undefined' ? tTasks : [])
+    .filter(t => !t.done && t.status !== 'done')
+    .sort((a,b) => {
+      const urgMap = {high:0,med:1,low:2};
+      return (urgMap[a.urgency]||1) - (urgMap[b.urgency]||1);
+    })
+    .slice(0, 3);
+
+  urgent.forEach((t, i) => {
+    jData[jTodayKey].tasks.push({
+      id: 'j' + Date.now() + i,
+      name: t.name,
+      pilier: 'gestion',  // default — user can change
+      done: false,
+      timerSec: 0,
+    });
+  });
+
+  // Si pas de tâches urgentes, créer 3 slots vides
+  const needed = 3 - jData[jTodayKey].tasks.length;
+  for (let i = 0; i < needed; i++) {
+    jData[jTodayKey].tasks.push({
+      id: 'j' + Date.now() + '-' + i,
+      name: '',
+      pilier: ['gestion','leads','publi'][i] || 'gestion',
+      done: false,
+      timerSec: 0,
+    });
+  }
+}
+
+function jSave() {
+  try { localStorage.setItem(J_SK, JSON.stringify(jData)); } catch(e) {}
+  // Push cloud
+  if (typeof SYNC_KEY_STORE !== 'undefined' && localStorage.getItem(SYNC_KEY_STORE)) {
+    clearTimeout(window._jSyncDebounce);
+    window._jSyncDebounce = setTimeout(() => {
+      if (typeof pushToCloudNow === 'function') pushToCloudNow();
+    }, 500);
+  }
+}
+
+// ── Render ──────────────────────────────────────────────
+function jRender() {
+  jTodayKey = jGetToday();
+  const todayData = jData[jTodayKey] || { tasks: [], note: '', totalSec: 0 };
+
+  // Date labels
+  const now = new Date();
+  const days = ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+  const months = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+  document.getElementById('j-today-label').textContent =
+    `${days[now.getDay()]} ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+
+  const pad = n => String(n).padStart(2,'0');
+  const today_parts = jTodayKey.split('-');
+  document.getElementById('j-top3-date-badge').textContent =
+    `${today_parts[2]}/${today_parts[1]}/${today_parts[0]}`;
+
+  // Top 3
+  jRenderTop3();
+  // Piliers stats
+  jRenderPiliers();
+  // Recap
+  jRenderRecap();
+  // Week
+  jRenderWeek();
+  // Note
+  const noteEl = document.getElementById('j-note-area');
+  if (noteEl && noteEl !== document.activeElement) {
+    noteEl.value = todayData.note || '';
+  }
+  // Focus
+  jUpdateFocusCard();
+}
+
+function jRenderTop3() {
+  const todayData = jData[jTodayKey];
+  const body = document.getElementById('j-top3-body');
+  if (!body) return;
+
+  body.innerHTML = todayData.tasks.map((t, i) => {
+    const colStr = PILIER_COLORS[t.pilier] || '#888';
+    const timerFmt = jFmtSec(t.timerSec || 0);
+    const isFocus = jFocusTaskId === t.id;
+    return `<div class="j-priority-item ${t.done ? 'j-done' : ''}" data-pilier="${t.pilier}" id="j-item-${t.id}">
+      <div class="j-prio-num">${i + 1}</div>
+      <div class="j-prio-body">
+        <div class="j-prio-name" contenteditable="${!t.done}" 
+          onblur="jRenameTask('${t.id}', this.textContent.trim())"
+          onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur()}"
+          >${jEsc(t.name) || '<span style="color:var(--muted);font-style:italic">Cliquez pour nommer…</span>'}</div>
+        <div class="j-prio-meta">
+          <span class="j-pilier-badge" data-p="${t.pilier}">${PILIER_LABELS[t.pilier]}</span>
+          <select class="j-prio-select" onchange="jChangePilier('${t.id}', this.value)" ${t.done?'disabled':''}>
+            <option value="gestion" ${t.pilier==='gestion'?'selected':''}>🏢 Gestion</option>
+            <option value="leads"   ${t.pilier==='leads'?'selected':''}>🎯 Leads</option>
+            <option value="publi"   ${t.pilier==='publi'?'selected':''}>📝 Publications</option>
+            <option value="seo"     ${t.pilier==='seo'?'selected':''}>🔍 SEO/GEO</option>
+          </select>
+          ${t.timerSec > 0 ? `<span style="font-size:10px;color:var(--muted);">⏱ ${timerFmt}</span>` : ''}
+        </div>
+      </div>
+      <div class="j-prio-actions">
+        <div class="j-check-btn ${t.done ? 'checked' : ''}" onclick="jToggleDone('${t.id}')">${t.done ? '✓' : ''}</div>
+        <div class="j-timer-btn ${isFocus && jFocusRunning ? 'running' : ''}" onclick="jSetFocus('${t.id}')" title="Démarrer le timer">
+          ${isFocus && jFocusRunning ? '⏸' : '▶'}
+        </div>
+        <div class="j-timer-display ${isFocus && jFocusRunning ? 'running' : ''}">${timerFmt}</div>
+        <div class="icon-btn del" onclick="jDeleteTask('${t.id}')" title="Supprimer" style="background:none;border:1px solid var(--border);color:var(--muted);cursor:pointer;padding:3px 6px;font-size:11px;">✕</div>
+      </div>
+    </div>`;
+  }).join('') || '<div style="text-align:center;padding:30px;color:var(--muted);font-size:11px;">Aucune priorité — ajoutez-en ci-dessous</div>';
+}
+
+function jRenderPiliers() {
+  const todayData = jData[jTodayKey];
+  const tasks = todayData.tasks;
+  const counts = { gestion: 0, leads: 0, publi: 0, seo: 0 };
+  const done   = { gestion: 0, leads: 0, publi: 0, seo: 0 };
+  tasks.forEach(t => {
+    counts[t.pilier] = (counts[t.pilier] || 0) + 1;
+    if (t.done) done[t.pilier] = (done[t.pilier] || 0) + 1;
+  });
+
+  // Stats cards
+  ['gestion','leads','publi','seo'].forEach(p => {
+    const el = document.getElementById('jst-' + p);
+    if (el) el.textContent = counts[p] || 0;
+  });
+
+  // Bars
+  const total = tasks.length || 1;
+  const body = document.getElementById('j-piliers-body');
+  if (!body) return;
+  body.innerHTML = Object.entries(PILIER_LABELS).map(([k, lbl]) => {
+    const n = counts[k] || 0;
+    const d = done[k] || 0;
+    const pct = Math.round(n / total * 100);
+    const col = PILIER_COLORS[k];
+    return `<div class="j-pilier-row">
+      <div class="j-pilier-icon">${lbl.split(' ')[0]}</div>
+      <div class="j-pilier-info">
+        <div class="j-pilier-name" style="color:${col}">${lbl.split(' ').slice(1).join(' ')}</div>
+        <div class="j-pilier-bar-bg">
+          <div class="j-pilier-bar-fill" style="width:${pct}%;background:${col}"></div>
+        </div>
+      </div>
+      <div class="j-pilier-count" style="color:${col}">${d}/${n}</div>
+    </div>`;
+  }).join('');
+}
+
+function jRenderRecap() {
+  const todayData = jData[jTodayKey];
+  const tasks = todayData.tasks;
+  const total = tasks.length;
+  const done = tasks.filter(t => t.done).length;
+  const pct = total ? Math.round(done / total * 100) : 0;
+  const totalTimeSec = tasks.reduce((s, t) => s + (t.timerSec || 0), 0) + (jFocusTaskId ? jFocusElapsed : 0);
+  const focusMin = Math.round(totalTimeSec / 60);
+
+  const body = document.getElementById('j-recap-body');
+  if (!body) return;
+  body.innerHTML = `
+    <div class="j-recap-row"><span class="j-recap-label">Tâches complétées</span><span class="j-recap-val" style="color:${done===total&&total>0?'var(--green)':'var(--ink)'}">${done}/${total}</span></div>
+    <div class="j-recap-row"><span class="j-recap-label">% Avancement</span><span class="j-recap-val" style="color:${pct>=100?'var(--green)':pct>=50?'var(--orange)':'var(--red)'}">${pct}%</span></div>
+    <div class="j-recap-row"><span class="j-recap-label">⏱ Temps de focus</span><span class="j-recap-val" style="color:var(--blue)">${focusMin} min</span></div>
+    <div style="background:#ece9e0;height:6px;margin:10px 0 4px;">
+      <div style="height:100%;width:${pct}%;background:${pct>=100?'var(--green)':pct>=50?'var(--orange)':'var(--blue)'};transition:width .5s"></div>
+    </div>
+    <div style="font-size:9px;color:var(--muted);text-align:right">${pct}% accompli</div>`;
+
+  // Total time display
+  const el = document.getElementById('j-total-time');
+  if (el) el.textContent = focusMin + ' min';
+}
+
+function jRenderWeek() {
+  const grid = document.getElementById('j-week-grid');
+  if (!grid) return;
+  const today = new Date();
+  const dayNames = ['Lu','Ma','Me','Je','Ve','Sa','Di'];
+  // Lundi de la semaine courante + offset
+  const weekStart = new Date(today);
+  weekStart.setDate(today.getDate() - ((today.getDay() + 6) % 7) + jWeekOffset * 7);
+  const pad = n => String(n).padStart(2,'0');
+
+  grid.innerHTML = dayNames.map((dn, di) => {
+    const d = new Date(weekStart);
+    d.setDate(weekStart.getDate() + di);
+    const key = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+    const isToday = key === jGetToday();
+    const dayData = jData[key];
+    const dots = dayData ? dayData.tasks.map(t => `
+      <div class="j-week-dot" style="background:${PILIER_COLORS[t.pilier] || '#aaa'};opacity:${t.done?1:.4}"></div>`
+    ).join('') : '';
+    return `<div class="j-week-day ${isToday ? 'j-today' : ''}" onclick="jSelectDay('${key}')">
+      <div class="j-week-day-name">${dn}</div>
+      <div class="j-week-day-num">${d.getDate()}</div>
+      <div class="j-week-day-dots">${dots}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── Actions ──────────────────────────────────────────────
+function jEsc(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function jFmtSec(sec) {
+  const h = Math.floor(sec / 3600);
+  const m = Math.floor((sec % 3600) / 60);
+  const s = sec % 60;
+  const pad = n => String(n).padStart(2,'0');
+  return h > 0 ? `${pad(h)}:${pad(m)}:${pad(s)}` : `${pad(m)}:${pad(s)}`;
+}
+
+function jAddTask() {
+  const input = document.getElementById('j-new-task');
+  const name = input.value.trim();
+  const pilier = document.getElementById('j-new-pilier').value;
+  if (!jData[jTodayKey]) jData[jTodayKey] = { tasks: [], note: '', totalSec: 0 };
+  jData[jTodayKey].tasks.push({
+    id: 'j' + Date.now(),
+    name: name || 'Nouvelle priorité',
+    pilier,
+    done: false,
+    timerSec: 0,
+  });
+  input.value = '';
+  jSave();
+  jRender();
+  showToast('✓ Priorité ajoutée');
+}
+
+function jToggleDone(id) {
+  const task = jData[jTodayKey]?.tasks?.find(t => t.id === id);
+  if (!task) return;
+  task.done = !task.done;
+  if (task.done && jFocusTaskId === id) jStopFocus();
+  jSave();
+  jRender();
+}
+
+function jChangePilier(id, pilier) {
+  const task = jData[jTodayKey]?.tasks?.find(t => t.id === id);
+  if (task) { task.pilier = pilier; jSave(); jRender(); }
+}
+
+function jRenameTask(id, name) {
+  const task = jData[jTodayKey]?.tasks?.find(t => t.id === id);
+  if (task && name) { task.name = name; jSave(); }
+}
+
+function jDeleteTask(id) {
+  if (!confirm('Supprimer cette priorité ?')) return;
+  jData[jTodayKey].tasks = jData[jTodayKey].tasks.filter(t => t.id !== id);
+  if (jFocusTaskId === id) jStopFocus();
+  jSave();
+  jRender();
+}
+
+function jWeekNav(dir) {
+  jWeekOffset += dir;
+  jRenderWeek();
+}
+
+function jSelectDay(key) {
+  // Affiche les tâches du jour sélectionné en toast rapide
+  const d = jData[key];
+  if (!d || !d.tasks.length) { showToast('Aucune tâche ce jour-là'); return; }
+  const done = d.tasks.filter(t => t.done).length;
+  showToast(`${key} — ${done}/${d.tasks.length} tâches`);
+}
+
+// ── Timer Focus ──────────────────────────────────────────
+function jSetFocus(id) {
+  if (jFocusTaskId === id && jFocusRunning) {
+    jStopFocus();
+  } else {
+    // Sauvegarder elapsed sur l'ancienne tâche
+    if (jFocusTaskId && jFocusElapsed > 0) {
+      const old = jData[jTodayKey]?.tasks?.find(t => t.id === jFocusTaskId);
+      if (old) old.timerSec = (old.timerSec || 0) + jFocusElapsed;
+    }
+    jFocusTaskId = id;
+    jFocusElapsed = 0;
+    jStartFocus();
+  }
+  jSave();
+  jRender();
+}
+
+function jStartFocus() {
+  jFocusRunning = true;
+  clearInterval(jFocusInterval);
+  jFocusInterval = setInterval(() => {
+    jFocusElapsed++;
+    jUpdateFocusCard();
+    jRenderRecap();
+    // Mise à jour timer dans la liste
+    const item = document.querySelector(`.j-timer-display`);
+    jUpdateTaskTimers();
+  }, 1000);
+  const btn = document.getElementById('j-focus-btn');
+  if (btn) btn.textContent = '⏸ Pause';
+}
+
+function jStopFocus() {
+  jFocusRunning = false;
+  clearInterval(jFocusInterval);
+  // Ajouter elapsed à la tâche
+  if (jFocusTaskId && jFocusElapsed > 0) {
+    const task = jData[jTodayKey]?.tasks?.find(t => t.id === jFocusTaskId);
+    if (task) task.timerSec = (task.timerSec || 0) + jFocusElapsed;
+    jFocusElapsed = 0;
+  }
+  const btn = document.getElementById('j-focus-btn');
+  if (btn) btn.textContent = '▶ Démarrer';
+  jSave();
+  jRender();
+}
+
+function jToggleFocus() {
+  if (!jFocusTaskId) {
+    // Prendre la première tâche non faite
+    const first = jData[jTodayKey]?.tasks?.find(t => !t.done);
+    if (!first) { showToast('⚠ Aucune tâche active'); return; }
+    jFocusTaskId = first.id;
+    jFocusElapsed = 0;
+  }
+  if (jFocusRunning) jStopFocus();
+  else jStartFocus();
+  jRender();
+}
+
+function jResetFocus() {
+  jStopFocus();
+  jFocusTaskId = null;
+  jFocusElapsed = 0;
+  jUpdateFocusCard();
+}
+
+function jUpdateFocusCard() {
+  const nameEl  = document.getElementById('j-focus-name');
+  const clockEl = document.getElementById('j-focus-clock');
+  const btnEl   = document.getElementById('j-focus-btn');
+  if (!nameEl || !clockEl) return;
+
+  if (jFocusTaskId) {
+    const task = jData[jTodayKey]?.tasks?.find(t => t.id === jFocusTaskId);
+    nameEl.textContent = task ? task.name : 'Tâche inconnue';
+    const totalSec = (task?.timerSec || 0) + jFocusElapsed;
+    clockEl.textContent = jFmtSec(totalSec);
+    clockEl.className = 'j-focus-clock' + (jFocusRunning ? '' : ' j-paused');
+  } else {
+    nameEl.textContent = 'Aucune tâche en cours';
+    clockEl.textContent = '00:00:00';
+    clockEl.className = 'j-focus-clock j-paused';
+  }
+  if (btnEl) btnEl.textContent = jFocusRunning ? '⏸ Pause' : '▶ Démarrer';
+}
+
+function jUpdateTaskTimers() {
+  if (!jFocusTaskId) return;
+  const task = jData[jTodayKey]?.tasks?.find(t => t.id === jFocusTaskId);
+  if (!task) return;
+  const totalSec = (task.timerSec || 0) + jFocusElapsed;
+  const timerEls = document.querySelectorAll('.j-timer-display.running');
+  timerEls.forEach(el => { el.textContent = jFmtSec(totalSec); });
+  // Also update focus card
+  const clockEl = document.getElementById('j-focus-clock');
+  if (clockEl) clockEl.textContent = jFmtSec(totalSec);
+}
+
+// ── Clock ────────────────────────────────────────────────
+function jStartClock() {
+  jUpdateClock();
+  clearInterval(jClockInterval);
+  jClockInterval = setInterval(jUpdateClock, 1000);
+}
+function jUpdateClock() {
+  const el = document.getElementById('j-clock');
+  if (!el) return;
+  const now = new Date();
+  const pad = n => String(n).padStart(2,'0');
+  el.textContent = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+}
+
+// ── Note ─────────────────────────────────────────────────
+function jSaveNote() {
+  const el = document.getElementById('j-note-area');
+  if (!el) return;
+  if (!jData[jTodayKey]) jData[jTodayKey] = { tasks: [], note: '', totalSec: 0 };
+  jData[jTodayKey].note = el.value;
+  jSave();
+  showToast('💾 Note sauvegardée');
+}
+
+// Auto-save note every minute
+clearInterval(jAutoSaveInterval);
+jAutoSaveInterval = setInterval(() => {
+  const el = document.getElementById('j-note-area');
+  if (el && jData[jTodayKey]) {
+    jData[jTodayKey].note = el.value;
+    jSave();
+  }
+}, 60000);
+
+// ── Historique ───────────────────────────────────────────
+function jOpenHistory() {
+  const body = document.getElementById('j-hist-body');
+  if (!body) return;
+  const keys = Object.keys(jData).sort().reverse().slice(0, 30);
+  if (!keys.length) {
+    body.innerHTML = '<div style="color:var(--muted);padding:20px;text-align:center">Aucun historique</div>';
+  } else {
+    body.innerHTML = keys.map(k => {
+      const d = jData[k];
+      if (!d || !d.tasks.length) return '';
+      const parts = k.split('-');
+      const dateLabel = `${parts[2]}/${parts[1]}/${parts[0]}`;
+      const done = d.tasks.filter(t => t.done).length;
+      return `<div class="j-hist-day">
+        <div class="j-hist-day-date">${dateLabel} — ${done}/${d.tasks.length} tâches</div>
+        ${d.tasks.map(t => `<div class="j-hist-task ${t.done ? 'j-hist-task-done' : 'j-hist-task-pending'}">
+          ${t.done ? '✓' : '○'} <span class="j-pilier-badge" data-p="${t.pilier}" style="border:1px solid ${PILIER_COLORS[t.pilier]};color:${PILIER_COLORS[t.pilier]};background:transparent;padding:1px 5px;font-size:8px;">${t.pilier}</span> ${t.name}
+          ${t.timerSec > 0 ? `<span style="color:var(--muted);font-size:9px;">⏱ ${jFmtSec(t.timerSec)}</span>` : ''}
+        </div>`).join('')}
+        ${d.note ? `<div style="font-size:10px;color:var(--muted);margin-top:6px;font-style:italic;white-space:pre-wrap;">${d.note.substring(0,200)}${d.note.length>200?'…':''}</div>` : ''}
+      </div>`;
+    }).filter(Boolean).join('') || '<div style="color:var(--muted);padding:20px">Aucune journée enregistrée</div>';
+  }
+  document.getElementById('j-hist-bd').classList.add('open');
+}
+
+function jCloseHistory() {
+  document.getElementById('j-hist-bd').classList.remove('open');
+}
+
+// ── Boot ──────────────────────────────────────────────────
+jLoad();
+jStartClock();
+jRender();
+
+// Sync depuis cloud — étendre collectAllData
+const _origCollect = typeof collectAllData === 'function' ? collectAllData : null;
+if (_origCollect) {
+  window.collectAllData = function() {
+    const base = _origCollect();
+    base.journee = jData;
+    return base;
+  };
+}
+const _origRestoreAll = typeof restoreAllData === 'function' ? restoreAllData : null;
+if (_origRestoreAll) {
+  window.restoreAllData = function(d) {
+    const ok = _origRestoreAll(d);
+    if (d.journee) { jData = d.journee; jRender(); }
+    return ok;
+  };
+}
+</script>
+
+
+<div class="toast" id="toast"></div>
+
+<footer>
+  EASTRATEGIES<sup>®</sup> — Module "Ma Journée" v13 ·
+  <a href="https://www.eastrategies.fr" style="color:#8a8378;text-decoration:none">eastrategies.fr</a>
+</footer>
+
+<script>
+// Fonctions utilitaires minimales (simulées pour ce module standalone)
+var tTasks = JSON.parse(localStorage.getItem('todo_tasks') || '[]');
+var SYNC_KEY_STORE = 'east_sync_apikey';
+
+function showToast(msg, dur) {
+  dur = dur || 2500;
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(function(){ t.classList.remove('show'); }, dur);
+}
+
+function switchTab(name, btn) {
+  document.querySelectorAll('.section').forEach(function(s){ s.classList.remove('active'); });
+  document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
+  var sec = document.getElementById('section-' + name);
+  if (sec) sec.classList.add('active');
+  if (btn) btn.classList.add('active');
+  if (name === 'journee') { jRender(); jStartClock(); }
+}
+
+function pushToCloudNow() {
+  // Stub: sync handled by main CRM
+}
+</script>
+</body>
+</html>
