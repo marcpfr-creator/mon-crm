@@ -1350,7 +1350,7 @@ header { padding-top: max(16px, env(safe-area-inset-top)); }
     <div class="modal-header"><h2 id="facture-modal-title">Nouvelle facture</h2><button class="modal-close" onclick="closeModal('modal-facture')">✕</button></div>
     <div class="modal-body">
       <div class="modal-sep">Informations facture</div>
-      <div class="field"><label>N° Facture *</label><input id="ff-num" placeholder="FAC-2026-001"></div>
+      <div class="field"><label>N° Facture *</label><input id="ff-num" placeholder="FAC-2026-181"></div>
       <div class="field"><label>Client *</label>
         <select id="ff-client"><option value="">— Sélectionner —</option></select>
       </div>
@@ -2237,7 +2237,7 @@ function openFactureModal(id=null){
   editingFacture=f?f.id:null;
   pendingFilesCtx.facture=f?JSON.parse(JSON.stringify(f.files||[])):[];
   document.getElementById('facture-modal-title').textContent=f?'Modifier la facture':'Nouvelle facture';
-  document.getElementById('ff-num').value=f?f.num:`FAC-2026-${String(factures.length+1).padStart(3,'0')}`;
+  document.getElementById('ff-num').value=f?f.num:`FAC-2026-${String(142+factures.length+1).padStart(3,'0')}`;
   document.getElementById('ff-client').value=f?f.client:'';
   document.getElementById('ff-statut').value=f?f.statut:'Brouillon';
   document.getElementById('ff-date_emission').value=f?f.date_emission:today.toISOString().split('T')[0];
